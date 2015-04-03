@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes" ?>
+<system email="yeying0311@126.com" host='http://127.0.0.1:8000'>
+<app>
+<name>apache</name>
+<majorv>2.2</majorv>
+<minorv>20</minorv>
+<date></date>
+</app>
+<app>
+<name>tomcat</name>
+<majorv>6.0</majorv>
+<minorv>20</minorv>
+<date></date>
+</app>
+</system>

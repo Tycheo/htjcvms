@@ -1,0 +1,48 @@
+<?xml version="1.0" standalone="yes" ?>
+<htjcvms>
+<application>
+<name>apache22>
+<url>http://httpd.apache.org/security/vulnerabilities_22.html</url>
+</application>
+<application>
+<name>apache24>
+<url>http://httpd.apache.org/security/vulnerabilities_24.html</url>
+</application>
+<application>
+<name>tomcat6</name>
+<url>http://tomcat.apache.org/security-6.html</url>
+</application>
+<application>
+<name>tomcat7</name>
+<url>http://tomcat.apache.org/security-7.html</url>
+</application>
+<application>
+<name>tomcat8</name>
+<url>http://tomcat.apache.org/security-8.html</url>
+</application>
+<application>
+<name>tomcatjk</name>
+<url>http://tomcat.apache.org/security-jk.html</url>
+</application>
+<application>
+<name>taglib</name>
+<url>http://tomcat.apache.org/security-taglibs.html</url>
+</application>
+<application>
+<name>openssl</name>
+<url>https://www.openssl.org/news/</url>
+</application>
+<application>
+<name>struts</name>
+<url>http://struts.apache.org/docs/security-bulletins.html</url>
+</application> 
+<application>
+<name>oracle>
+<url>http://www.oracle.com/technetwork/topics/security/alerts-086861.html</url>
+<app name="mysql" fpath='mysql' match="Oracle MySQL"/>
+<app name="jre" fpath='jre' match="Oracle Java SE Embedded"/>
+<app name="jdk" fpath='jdk' match="Oracle Java SE"/>
+<app name="JavaFX" fpath="javafx" match="Oracle JavaFX"/>
+<app name="oracledb" fpath='oracledb' match="Oracle Database"/>
+</application>
+</htjcvms>
