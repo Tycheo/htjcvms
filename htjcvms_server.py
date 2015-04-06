@@ -9,6 +9,7 @@ import os
 import sqlite3
 import time
 import shutil
+import htjcvms_gpatch
 from xml.dom.minidom import parse, parseString
 
     
@@ -113,45 +114,56 @@ def closedb():
 def initdb(name):
     conn=sqlite3.connect(name)
     cu=conn.cursor()
-    cu.execute("create table httpd (majorv varchar(10),minorv char(1024),fix varchar(10),vid varchar(20),fpath varchar(128))")
-    cu.execute("create table tomcat (majorv varchar(10),minorv char(1024),fix varchar(10),vid varchar(20),fpath varchar(128))")
-    cu.execute("create table oracledb (majorv varchar(10),minorv char(1024),fix varchar(10),vid varchar(20),fpath varchar(128))")
-    cu.execute("create table mysql (majorv varchar(10),minorv char(1024),fix varchar(10),vid varchar(20),fpath varchar(128))")
-    return conn,cu
+    cu.execute("create table httpd (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table tomcat (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table oracledb (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table mysql (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table tomcatjk (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table taglib (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table mysql (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table jdk (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    #return conn,cu
     #print cu.execute('select * from test').fetchall()
-    #conn.commit()
-    #cu.close()
-    #conn.close()
+    conn.commit()
+    cu.close()
+    conn.close()
     #status=1
 
-def checknewpatch():
+def checknewpatch(name):
     doc=parse('htjcvms.xml')
-    import htjcvms_gpatch
+    #conn,cu=htjcvms_gpatch.initdb(name)
     applications=doc.getElementsByTagName('application')
     for app in applications:
         name=app.getElementsByTagName('name')[0].childNodes[0].data
-        version=app.getElementsByTagName('url')[0].childNodes[0].data
+        url=app.getElementsByTagName('url')[0].childNodes[0].data
         print name,url
-        htjcvms_gpatch.distribute(name,url)
+        htjcvms_gpatch.distribute(cu,name,url,app)
+    conn.commit()
+    #cu.close()
+    #conn.close()
+    print "==========check new patch sussfully======================="
 
 if __name__=='__main__':
     print os.getcwd()
     lastime=0
-    if not getinitdb():
+    if not getdb():
         status=1
     httpd=threading.Thread(target=SimpleHTTPServer.test,args=(myhttphandle,))
     httpd.start()
-    if True:
+    while True:
         if status==1:
-            checknewpatch('htjcvms.db')
+            initdb('htjcvms.db')
             getdb()
+            checknewpatch('htjcvms.db')
             status=0
-        time.sleep(600*3)
+        time.sleep(1)#600*3)
         h=time.localtime().tm_hour
-        if (h==8 or h==18) and h!=lastime:
+        if (h==8 or h==18) and h!=lastime or 1:
+            checknewpatch('htjcvms.db')
+        lastime=h
+'''
             if os.path.exists('htjcvms.bk'):
                 os.remove('htjcvms.bk')
-            checknewpatch('htjcvms.bk')
             if issame('htjcvms.bk','htjcvms.db')==1:
                 status=2
                 closedb()
@@ -160,8 +172,9 @@ if __name__=='__main__':
                 shutil.move('htjcvms.bk','htjcvms.db')
                 getdb()
                 status=0
-            lastime=h
             
+'''
+
 #SimpleHTTPServer.test(myhttphandle)
 #sendemail('864804336@qq.com','this is a test')
 #G:\Pyproject\htjcvms
