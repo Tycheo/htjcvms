@@ -31,10 +31,12 @@ class myhttphandle(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.db=getdb()
             
     def do_GET(self):
+        if not self.dbisok(f):
+            return        
         self.actfunc={'checkpatch':self.checkpatch,'listinfo':self.listinfo}
         f=SimpleHTTPServer.StringIO()
-        self.getcursor()
-        f.write('this is request args::'+self.path+'<br>')
+        #self.getcursor()
+        f.write('ok<br>')#this is request args::'+self.path+'<br>')
         self.parseARGS()
         if not self.argsdit.get('func'):
             f.write('this request have not a function <br>')
@@ -73,29 +75,42 @@ class myhttphandle(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
     def checkpatch(self,f):
         #checkpatch major mijor name
-        f.write('this is a checkpath<br>')
-        print self.argsdit
-        if status==1:
-            print "server is initializing..."
-        self.senddata()
-        
-    def listinfo(self,f):
-        #listinfo name
         try:
-            rs=self.db[1].execute('select * from %s' %self.argsdit['name']).fetchall()
+            rs=db[1].execute("select * from %s where major='%s'" %(self.argsdit['name'],self.argsdit['major']))
+            for r in rs:
+                if inrange(r[2],self.argsdit['mijor']):
+                    f.write(','.join(r))
+            if f.tell()>10:
+                self.senddata(f,210,'VBD')
+            else:
+                self.senddata(f,209,'VOK')
+        except Exception:
+            f.write('a invaild request<br>')
+            self.senddata(f,203,'INVP')
+
+    def dbisok(self,f):
+        if status==1:
+            f.write("server db is initializing,it's get data from internet")
+            self.senddata(f,204,'INIT')
+            return
+        return 1
+    def listinfo(self,f):
+        #listinfo name   
+        try:
+            rs=db[1].execute('select * from %s' %self.argsdit['name']).fetchall()
             f.write('<html>\n<title>%s table</title>\n<head><h1>%s infortion table</h1></head>\n' %(self.argsdit['name'],self.argsdit['name']))
-            f.write('<body><table><tbody>\n<tr><th>name</th><th>major</th><th>mijor</mijor><th>fix</th><th>fix</th><th>vid</th><th>risk</th></tr>\n')
+            f.write("<body><table border=5><tbody>\n<tr><th>name</th><th>major</th><th>mijor</mijor><th>fix</th><th>vid</th><th>risk</th></tr>\n")
             for r in rs:
                 f.write("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n" %(self.argsdit['name'],r[0],r[1],r[2],r[3],r[4]))
             f.write("</tbody></table></body>\n</html>")
-            self.senddata()
+            self.senddata(f)
         except Exception:
             f.write('A Invaild parameter<br>')
             self.senddata('203','INVP')
     def __del__(self):
-        self.db[0].commit()
-        self.db[1].close()
-        self.db[0].close()
+        db[0].commit()
+        db[1].close()
+        db[0].close()
         
 def getsmtp():
     global smtp
@@ -103,6 +118,31 @@ def getsmtp():
     smtp.connect(smtpserver)
     smtp.login(username,password)
     
+            
+def inrange(src,dst):
+    ss=src.split(',')
+    for s in ss:
+        if inrge(s,dst):
+            return True
+    return False
+
+def inrge(s,dst):
+    if s[0]=='-':
+        ds=s[1:].split('.')
+        dt=s.split('.')
+        a=len(dt)
+        b=len(ds)
+        if a>=b:
+            m=b
+        else:
+            m=a
+        for i in range(m):
+            if int(ds[i])>int(dt[i]):
+                return True
+        if a>=b:
+            return True
+        
+        return False
 
     
 def sendemail(email,body):
@@ -119,14 +159,13 @@ def sendemail(email,body):
         index+=1
         
 def getdb():
-    global conn
-    global cu
     if os.path.isfile('htjcvms.db'):
         conn=sqlite3.connect('htjcvms.db')
         cu=conn.cursor()
         return conn,cu
     
-def closedb():
+def closedb(cu,conn):
+    conn.commit()
     cu.close()
     conn.close()
     
@@ -146,40 +185,43 @@ def initdb(name):
     cu.execute("create table struts (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
     cu.execute("create table openssl (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
     conn.commit()
-    cu.close()
-    conn.close()
+    return conn,cu
 
-def checknewpatch(name):
+def checknewpatch(db,name):
     doc=parse('htjcvms.xml')
-    #conn,cu=htjcvms_gpatch.initdb(name)
     applications=doc.getElementsByTagName('application')
     for app in applications:
         name=app.getElementsByTagName('name')[0].childNodes[0].data
         url=app.getElementsByTagName('url')[0].childNodes[0].data
         print name,url
-        htjcvms_gpatch.distribute(cu,name,url,app)
-    conn.commit()
-    #cu.close()
-    #conn.close()
+        htjcvms_gpatch.distribute(db[1],name,url,app)
+    db[0].commit()
     print "==========check new patch sussfully======================="
-
+    
+db=None        
+def theadhttp(requesthandle):
+    global db
+    db=getdb()
+    SimpleHTTPServer.test(requesthandle)
+    
 if __name__=='__main__':
     print os.getcwd()
     lastime=0
-    if not getdb():
+    gdb=getdb()
+    if not gdb:
         status=1
-    httpd=threading.Thread(target=SimpleHTTPServer.test,args=(myhttphandle,))
+    #httpd=threading.Thread(target=SimpleHTTPServer.test,args=(myhttphandle,))
+    httpd=threading.Thread(target=theadhttp,args=(myhttphandle,))
     httpd.start()
     while True:
         if status==1:
-            initdb('htjcvms.db')
-            getdb()
-            checknewpatch('htjcvms.db')
+            gdb=initdb('htjcvms.db')
+            checknewpatch(gdb,'htjcvms.db')
             status=0
         time.sleep(600)#600*3)
         h=time.localtime().tm_hour
         if (h==8 or h==18) and h!=lastime or 1:
-            checknewpatch('htjcvms.db')
+            checknewpatch(gdb,'htjcvms.db')
         lastime=h
 '''
             if os.path.exists('htjcvms.bk'):
