@@ -2,6 +2,7 @@ import httplib2
 import os
 import sys
 import sqlite3
+import re
 from xml.dom.minidom import parse, parseString
 try:
     from bs4 import *
@@ -105,17 +106,52 @@ def getpatch2openssl(cursor,url,app):
     pass
 
 def getpatch2struts(cursor,url,app):
-    pass
+    http=httplib2.Http()
+    head,body=http.request(url)
+    if head['status']=='200':
+        soup=BeautifulSoup(body)
+        ul=soup.find('ul',{'class':'childpages-macro'})
+        urls=ul.findAll('a',{'shape':'rect'})
+        for url in urls:
+            getpatch2strutsurl(cursor,"http://struts.apache.org/docs/"+url['href'],app)
 
-
-
+def getpatch2strutsurl(cursor,url,app):
+    http=httplib2.Http()
+    head,body=http.request(url)
+    if head['status']=='200':
+        soup=BeautifulSoup(body)
+        itable=soup.find('table',{'class':'confluenceTable'})
+        titles=itable.findAll('th')
+        values=itable.findAll('td')
+        if len(titles)!=len(values):
+            print "parse url %s error" %url
+            return
+        major='2'
+        mijor=''
+        risk=''
+        vid=''
+        fix=''
+        for i in range(len(titles)):
+            if titles[i].p.contents[0].find('rating')>=0:
+                risk=values[i].p.contents[0].strip()
+            if titles[i].p.contents[0].find('Recommendation')>=0:
+                fix=values[i].a.contents[0]
+                fix=re.search('Struts (2(\.\d{1,2})+)',fix).group(1)
+            if titles[i].p.contents[0].find('Affected')==0:
+                affects=values[i].p.contents[0]
+                rgs=re.findall('Struts (2(\.\d{1,2})+)',affects)
+                if not rgs:
+                    rgs=re.findall('(2(\.\d{1,2})+)',affects)
+                mijor=rgs[0][0]+':'+rgs[1][0]
+        sqlinsert(cursor,'struts',(major,mijor,fix,vid,risk))
+        
 def getresult4oracle(rs,apps):
     for app in apps:
         if rs.find(app['match'])==0:
-            rs={}
-            rs['name']=app['name']
-            rs['values']=('major','mijor','fix','vid','risk')
-            return rs
+            dtrs={}
+            dtrs['name']=app['name']
+            dtrs['values']=('major',rs,'fix','vid','risk')
+            return dtrs
         
 def getpatch2orcpurl(cursor,url,app):
     http=httplib2.Http()

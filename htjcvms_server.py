@@ -17,7 +17,7 @@ ppath="G:\\Pyproject\\htjcvms\\downloadfile"
 smtp=None
 conn=None
 cu=None
-status=0 #1-create init db  2-get update db
+status=0
 sender="yeying0311@126.com"
 subject="HTJC Security Reopot:new security patch is adapt you system,please update for vulnerability system"
 smtpserver='smtp.126.com'
@@ -26,25 +26,31 @@ password='htjcvmspassword'
 ########################################################################
 class myhttphandle(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
+    def getcursor(self):
+        if self.db:
+            self.db=getdb()
+            
     def do_GET(self):
-        self.actfunc={'checkpatch':self.checkpatch}
+        self.actfunc={'checkpatch':self.checkpatch,'listinfo':self.listinfo}
         f=SimpleHTTPServer.StringIO()
+        self.getcursor()
         f.write('this is request args::'+self.path+'<br>')
         self.parseARGS()
         if not self.argsdit.get('func'):
             f.write('this request have not a function <br>')
-            self.send_response(201,'NOTFUNC')
-        if self.argsdit.get('func'):
-            try:
-                self.actfunc.keys().index(self.argsdit['func'])
-                self.actfunc[self.argsdit['func']]()
-                self.send_response(200)
-            except ValueError:
-                f.write('this request have a nonexist function <br>')
-                self.send_response(202,'NONEXIST')
-        
+            self.senddata(f,201,'NOTFUNC')
+            return
+        if self.actfunc.get(self.argsdit['func']):
+            self.actfunc[self.argsdit['func']](f)
+        else:
+            f.write('this request have a nonexist function <br>')
+            self.senddata(f,202,'NOTEXIST')
+    
+            
+    def senddata(self,f,code=200,msg='OK'):
         length=f.tell()
-        f.seek(0)        
+        f.seek(0)
+        self.send_response(code,msg)
         encoding = sys.getfilesystemencoding()
         self.send_header("Content-type", "text/html; charset=%s" % encoding)
         self.send_header("Content-Length", str(length))
@@ -53,7 +59,6 @@ class myhttphandle(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.copyfile(f, self.wfile)
         finally:
             f.close()
-            
             
     def parseARGS(self):
         try:
@@ -66,25 +71,39 @@ class myhttphandle(SimpleHTTPServer.SimpleHTTPRequestHandler):
         except Exception:
             print self.path
     
-    def checkpatch(self):
-        print 'this is a checkpath'
+    def checkpatch(self,f):
+        #checkpatch major mijor name
+        f.write('this is a checkpath<br>')
         print self.argsdit
         if status==1:
             print "server is initializing..."
-        pass
-    
+        self.senddata()
+        
+    def listinfo(self,f):
+        #listinfo name
+        try:
+            rs=self.db[1].execute('select * from %s' %self.argsdit['name']).fetchall()
+            f.write('<html>\n<title>%s table</title>\n<head><h1>%s infortion table</h1></head>\n' %(self.argsdit['name'],self.argsdit['name']))
+            f.write('<body><table><tbody>\n<tr><th>name</th><th>major</th><th>mijor</mijor><th>fix</th><th>fix</th><th>vid</th><th>risk</th></tr>\n')
+            for r in rs:
+                f.write("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n" %(self.argsdit['name'],r[0],r[1],r[2],r[3],r[4]))
+            f.write("</tbody></table></body>\n</html>")
+            self.senddata()
+        except Exception:
+            f.write('A Invaild parameter<br>')
+            self.senddata('203','INVP')
+    def __del__(self):
+        self.db[0].commit()
+        self.db[1].close()
+        self.db[0].close()
+        
 def getsmtp():
     global smtp
     smtp=smtplib.SMTP()
     smtp.connect(smtpserver)
     smtp.login(username,password)
     
-def issame(f1,f2):
-    if os.path.getsize(f1)==os.path.getsize(f2):
-        return 0
-    if os.path.getsize(f1)>os.path.getsize(f2):
-        return 1
-    return -1
+
     
 def sendemail(email,body):
     msg=MIMEText(body,'html','utf8')
@@ -105,7 +124,7 @@ def getdb():
     if os.path.isfile('htjcvms.db'):
         conn=sqlite3.connect('htjcvms.db')
         cu=conn.cursor()
-        return 1
+        return conn,cu
     
 def closedb():
     cu.close()
@@ -116,18 +135,19 @@ def initdb(name):
     cu=conn.cursor()
     cu.execute("create table httpd (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
     cu.execute("create table tomcat (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
-    cu.execute("create table oracledb (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
-    cu.execute("create table mysql (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
     cu.execute("create table tomcatjk (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
-    cu.execute("create table taglib (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
-    cu.execute("create table mysql (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table taglib (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")    
+    cu.execute("create table oracledb (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table mysql (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")    
     cu.execute("create table jdk (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
-    #return conn,cu
-    #print cu.execute('select * from test').fetchall()
+    cu.execute("create table jre (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table javafx (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table weblogic (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table struts (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
+    cu.execute("create table openssl (majorv varchar(10),mijorv char(1024),fix varchar(10),vid varchar(20),risk varchar(20),primary key(majorv,mijorv,fix,vid,risk))")
     conn.commit()
     cu.close()
     conn.close()
-    #status=1
 
 def checknewpatch(name):
     doc=parse('htjcvms.xml')
@@ -156,7 +176,7 @@ if __name__=='__main__':
             getdb()
             checknewpatch('htjcvms.db')
             status=0
-        time.sleep(1)#600*3)
+        time.sleep(600)#600*3)
         h=time.localtime().tm_hour
         if (h==8 or h==18) and h!=lastime or 1:
             checknewpatch('htjcvms.db')

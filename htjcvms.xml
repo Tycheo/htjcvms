@@ -37,18 +37,20 @@
 <name>openssl</name>
 <url>https://www.openssl.org/news/</url>
 </application>
+-->
 <application>
 <name>struts</name>
 <url>http://struts.apache.org/docs/security-bulletins.html</url>
 </application> 
--->
+<!--
 <application>
 <name>oracle</name>
 <url>http://www.oracle.com/technetwork/topics/security/whatsnew/index.html</url>
-<app name="mysql" fpath='mysql' match="Oracle MySQL"/>
-<app name="jre" fpath='jre' match="Oracle Java SE Embedded"/>
-<app name="jdk" fpath='jdk' match="Oracle Java SE,"/>
-<app name="javafx" fpath="javafx" match="Oracle JavaFX"/>
-<app name="oracledb" fpath='oracledb' match="Oracle Database"/>
-</application>
+<app name="mysql" match="Oracle MySQL"/>
+<app name="jre" match="Oracle Java SE Embedded"/>
+<app name="jdk" match="Oracle Java SE,"/>
+<app name="javafx" match="Oracle JavaFX"/>
+<app name="oracledb" match="Oracle Database"/>
+<app name='weblogic" match="Oracle WebLogic Server"/>
+</application>-->
 </htjcvms>
