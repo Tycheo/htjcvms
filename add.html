@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ADD NEW PATCH INFO</title>
+<style type="text/css">
+body {font:22px/33px Arial, Helvetica, sans-serif; color:#666;}
+input.required{border:#999 1px solid; font-size:22px; height:22px; width:520px;}
+label{text-align:right; width:60px; float:left;}
+.sub{margin-left:50px;}
+.int{margin:5px auto;}
+</style>
+</head>
+<body>
+<form name="input" action="/" method="get">
+name:
+<select name="name" style="border:#999 1px solid; width:100px; height:22px">
+<option value="httpd">httpd</option>
+<option value="tomcat">tomcat</option>
+<option value="taglib">taglib</option>
+<option value="tomcatjk">tomcatjk</option>
+<option value="jdk">jdk</option>
+<option value="jre">jre</option>
+<option value="mysql">mysql</option>
+<option value="oracledb">oracledb</option>
+<option value="javafx">javafx</option>
+<option value="weblogic">weblogic</option>
+<option value="struts">struts</option>
+<option value="openssl">openssl</option>
+</select> <br/>
+<div class="int">
+major:
+<input type="text" name="major" class="required"/></br>
+</div>
+<div class="int">
+mijor:
+<input type="text" name="mijor" class="required" style="width:1000px"/></br>
+</div>
+<div class="int">
+fix:&nbsp;&nbsp;
+<input type="text" name="fix" class="required"/></br>
+time:&nbsp;&nbsp;&nbsp;<input type="text" name="time" class="required"/></br>
+</div>
+<div class="int">
+vid:&nbsp;&nbsp;
+<input type="text" name="vid" class="required"/></br>
+</div>
+<div class="int">
+risk:&nbsp;&nbsp;
+<input type="text" name="risk" class="required"/></br>
+url:&nbsp;&nbsp;&nbsp;<input type="text" name="url" class="required"/></br>
+<input type="hidden" name="func" value="addpatch"/>
+<input type="submit" value="Submit" />
+</form>
+</body>
+</html>

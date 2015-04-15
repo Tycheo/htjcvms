@@ -2,14 +2,14 @@
 <system email="yeying0311@126.com" host='http://127.0.0.1:8000'>
 <app>
 <name>apache</name>
-<majorv>2.2</majorv>
-<minorv>20</minorv>
+<major>2.2</major>
+<mijorv>20</mijor>
 <date></date>
 </app>
 <app>
 <name>tomcat</name>
-<majorv>6.0</majorv>
-<minorv>20</minorv>
+<major>6.0</major>
+<mijor>20</mijor>
 <date></date>
 </app>
 </system>

@@ -1,12 +1,23 @@
 <?xml version="1.0" standalone="yes" ?>
 <htjcvms>
-<!--
+
+<application>
+<name>microsoft</name>
+<url>https://technet.microsoft.com/zh-cn/security/bulletin</url>
+</application>
+
+<application>
+<name>openssl</name>
+<url>https://www.openssl.org/news/vulnerabilities.html</url>
+</application>
+
 <application>
 <name>apache22</name>
 <url>http://httpd.apache.org/security/vulnerabilities_22.html</url>
 <download url="http://archive.apache.org/dist/httpd/binaries/win32" platform='win32'/>
 <download url="http://archive.apache.org/dist/httpd" match="httpd-$major.$mijor.tar.gz" platform='linux'/>
 </application>
+
 <application>
 <name>apache24</name>
 <url>http://httpd.apache.org/security/vulnerabilities_24.html</url>
@@ -16,41 +27,42 @@
 <name>tomcat6</name>
 <url>http://tomcat.apache.org/security-6.html</url>
 </application>
+
 <application>
 <name>tomcat7</name>
 <url>http://tomcat.apache.org/security-7.html</url>
 </application>
+
 <application>
 <name>tomcat8</name>
 <url>http://tomcat.apache.org/security-8.html</url>
 </application>
+
 <application>
 <name>tomcatjk</name>
 <url>http://tomcat.apache.org/security-jk.html</url>
 </application>
+
 <application>
 <name>taglib</name>
 <url>http://tomcat.apache.org/security-taglibs.html</url>
 </application>
 
 <application>
-<name>openssl</name>
-<url>https://www.openssl.org/news/</url>
-</application>
--->
-<application>
 <name>struts</name>
 <url>http://struts.apache.org/docs/security-bulletins.html</url>
 </application> 
-<!--
+
 <application>
 <name>oracle</name>
 <url>http://www.oracle.com/technetwork/topics/security/whatsnew/index.html</url>
-<app name="mysql" match="Oracle MySQL"/>
-<app name="jre" match="Oracle Java SE Embedded"/>
-<app name="jdk" match="Oracle Java SE,"/>
-<app name="javafx" match="Oracle JavaFX"/>
-<app name="oracledb" match="Oracle Database"/>
-<app name='weblogic" match="Oracle WebLogic Server"/>
-</application>-->
+<app name="jre" match="Oracle Java SE Embedded" major="(\d)u"/>
+<app name="jdk" match="Oracle Java SE," major="(\d)u"/>
+<app name="javafx" match="Oracle JavaFX" major="(\d\.\d)\."/>
+<app name="oracledb" match="Oracle Database" major="(\d{1,2}\.\d)\."/>
+<app name="oracledb" match="Oracle8i" major="(\d{1,2}\.\d)\."/>
+<app name="oracledb" match="Oracle9i" major="(\d{1,2}\.\d)\."/>
+<app name="weblogic" match="Oracle WebLogic Server" major="(\d{1,2}\.\d)\."/>
+</application>
+
 </htjcvms>
