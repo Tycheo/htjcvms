@@ -1,11 +1,11 @@
 import smtplib
 from email.mime.text import MIMEText
 
-sender="htjcvms@126.com"
+sender="htjcvms@test.com"
 subject="HTJC Security Reopot:new security patch is adapt you system,please update for vulnerability system"
-smtpserver='smtp.126.com'
-username='htjcvms@126.com'
-password='fxehsnczvmpuhjxd'#htjcvmspassword'
+smtpserver='smtp.test.com'
+username='htjcvms@test.com'
+password='testpasswd'#htjcvmspassword'
 smtp=None
 emailbody=""
 
